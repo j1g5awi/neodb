@@ -52,6 +52,7 @@ class SiteName(models.TextChoices):
     Fediverse = "fedi", _("Fediverse")  # type:ignore[reportCallIssue]
     Qidian = "qidian", _("Qidian")  # type:ignore[reportCallIssue]
     Ypshuo = "ypshuo", _("Ypshuo")  # type:ignore[reportCallIssue]
+    AO3 = "ao3", _("Archive of Our Own")  # type:ignore[reportCallIssue]
 
 
 class IdType(models.TextChoices):
@@ -115,6 +116,7 @@ class IdType(models.TextChoices):
     Fediverse = "fedi", _("Fediverse")  # type:ignore[reportCallIssue]
     Qidian = "qidian", _("Qidian")  # type:ignore[reportCallIssue]
     Ypshuo = "ypshuo", _("Ypshuo")  # type:ignore[reportCallIssue]
+    AO3 = "ao3", _("Archive of Our Own")  # type:ignore[reportCallIssue]
 
 
 IdealIdTypes = [
@@ -725,6 +727,10 @@ class Item(PolymorphicModel):
             else None
         )
 
+    @property
+    def default_cover_image_url(self) -> str:
+        return f"{settings.SITE_INFO['site_url']}{settings.DEFAULT_ITEM_COVER}"
+
     def merge_data_from_external_resource(
         self, p: "ExternalResource", ignore_existing_content: bool = False
     ):
@@ -734,7 +740,7 @@ class Item(PolymorphicModel):
                 if not getattr(self, k) or ignore_existing_content:
                     setattr(self, k, v)
                 elif k in self.METADATA_MERGE_LIST:
-                    setattr(self, k, uniq((v or []) + getattr(self, k, [])))
+                    setattr(self, k, uniq(getattr(self, k, []) + (v or [])))
         if p.cover and (not self.has_cover() or ignore_existing_content):
             self.cover = p.cover
 
