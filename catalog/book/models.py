@@ -281,12 +281,13 @@ class Edition(Item):
             return detect_isbn_asin(lookup_id_value)
         return super().lookup_id_cleanup(lookup_id_type, lookup_id_value)
 
-    def get_work(self) -> "Work | None":
+    @property
+    def parent_item(self) -> "Work | None":
         return Work.objects.filter(editions=self).first()
 
-    def set_work(self, work: "Work | None"):
-        w = self.get_work()
-        if w == work:
+    def set_parent_item(self, value: "Work | None"):
+        w = self.parent_item
+        if w == value:
             return
         self.log_action({"work": [str(w), str(work)]})
         if w:
